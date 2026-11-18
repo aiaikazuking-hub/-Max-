@@ -246,6 +246,7 @@ li button:disabled{background:#999;cursor:default}
 .card.warn{background:#ffd6d2}
 .openExt{display:none;text-decoration:none;text-align:center}
 #micHint{max-width:380px}
+#closedClock{font-size:16px;color:#fff;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;margin:0}
 </style>
 </head>
 <body>
@@ -318,9 +319,41 @@ li button:disabled{background:#999;cursor:default}
   <button class="btn sub" data-go="menu">戻る</button>
 </section>
 
+<!-- アクセス時間外画面 -->
+<section class="screen" id="s-closed">
+  <h1>🔒<small>時間外です</small></h1>
+  <div class="card">
+    <p style="text-align:center;line-height:2.2">
+      このサイトは<br>
+      <b style="font-size:22px;color:var(--acc)">8:00〜17:00</b><br>
+      のみ遊べます！<br>
+      <span style="font-size:13px;color:var(--mut)">また時間内にきてね 👋</span>
+    </p>
+  </div>
+  <p id="closedClock"></p>
+</section>
+
 </div>
 
 <script>
+/* ---------- 時間帯アクセス制限 JST 8:00〜17:00 ---------- */
+(function(){
+  const getJST=()=>{const n=new Date();return{h:(n.getUTCHours()+9)%24,m:n.getUTCMinutes(),s:n.getUTCSeconds()}};
+  const OPEN=8,CLOSE=17;
+  const t=getJST();
+  if(t.h<OPEN||t.h>=CLOSE){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+    const sc=document.getElementById('s-closed');
+    if(sc)sc.classList.add('on');
+    setInterval(()=>{
+      const j=getJST();
+      const cl=document.getElementById('closedClock');
+      if(cl)cl.textContent='現在時刻 '+String(j.h).padStart(2,'0')+':'+String(j.m).padStart(2,'0')+':'+String(j.s).padStart(2,'0')+' (JST)';
+      if(j.h>=OPEN&&j.h<CLOSE)location.reload();
+    },1000);
+  }
+})();
+
 const $=id=>document.getElementById(id);
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
